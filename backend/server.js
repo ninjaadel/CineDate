@@ -13,6 +13,7 @@ app.use(express.json());
 
 const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+const rooms = new Map();
 
 const USER_AGENT =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36";
@@ -50,3 +51,51 @@ app.get("api/extract-url", async (req, res) => {
       .json({ error: "ayıklama hatası", details: error.message });
   }
 });
+
+io.on("connection", (socket) => {
+  io.on("create_room", ({ streamUrl, headers }, callback) => {
+    const roomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    rooms.set(roomId, {
+      hostId: socket.id,
+      streamUrl,
+      headers,
+      isPlaying: false,
+      currentTime: 0,
+    });
+    socket.join(roomId);
+    if (callback) callback({ success: true, roomId });
+  });
+
+  io.on("join-room", ({ roomId }, callback) => {
+    const room = rooms.get(roomId);
+    if (!room)
+      return callback && callback({ success: false, error: "oda bulunmadı" });
+
+    socket.join(roomId);
+
+    socket.emit("sync_initial_state", room);
+    socket.to(roomId).emit("user_joined", { userId: socket.id });
+    if (callback) callback({ success: true, room });
+
+    socket.on("player_action", ({ roomId, type, time }) => {
+      const room = rooms.get(roomId);
+      if (room) return;
+
+      room.currentTime = time;
+      room.isPlaying = type === "PLAY";
+      socket
+        .to(roomId)
+        .emit("player_action", { type, time, actionBy: socket.id });
+    });
+
+    socket.on("disconnect", () => {
+      rooms.forEach((room, roomId) => {
+        if (room.hostId === socket.id) {
+          io.to(roomId).emit("host_left");
+          rooms.delete(roomId);
+        }
+      });
+    });
+  });
+});
+server.listen(4000, () => console.log("CineDate Backend 4000 portunda aktif"));
