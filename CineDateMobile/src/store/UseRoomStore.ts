@@ -3,10 +3,10 @@ import { create } from 'zustand';
 interface RoomState {
   roomId: string | null;
   streamUrl: string | null;
+  headers: Record<string, string>;
   isPlaying: boolean;
   currentTime: number;
   isHost: boolean;
-  headers: Record<string, string>;
   setRoomData: (data: {
     roomId: string;
     streamUrl?: string;
@@ -24,7 +24,6 @@ export const useRoomStore = create<RoomState>(set => ({
   isPlaying: false,
   currentTime: 0,
   isHost: false,
-
   setRoomData: data => set(state => ({ ...state, ...data })),
   setPlayerState: (isPlaying, currentTime) => set({ isPlaying, currentTime }),
   resetRoom: () =>
