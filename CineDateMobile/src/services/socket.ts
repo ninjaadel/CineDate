@@ -1,5 +1,5 @@
 import { io, Socket } from 'socket.io-client';
-import { useRoomStore } from '../store/useRoomStore';
+import { useRoomStore } from '../store/UseRoomStore';
 
 // Emulator için 'http://10.0.2.2:4000', gerçek cihaz/test için bilgisayarınızın yerel IP adresi
 const SOCKET_URL = 'http://10.0.2.2:4000';
