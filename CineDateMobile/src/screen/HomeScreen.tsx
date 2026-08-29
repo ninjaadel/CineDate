@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useRoomStore } from '../store/UseRoomStore';
-import { Alert } from 'react-native';
+import { Alert, View } from 'react-native';
 import axios from 'axios';
 import SocketService from '../services/socket';
+import socket from '../services/socket';
 
 const API_URL = process.env.API_URL;
 export const HomeScreen = ({ navigation }: any) => {
@@ -38,7 +39,7 @@ export const HomeScreen = ({ navigation }: any) => {
               isHost: true,
               headers,
             });
-            navigation.navigate('room');
+            navigation.navigate('Room');
           } else {
             Alert.alert('hata', 'oda oluşturulamadı');
           }
@@ -49,4 +50,33 @@ export const HomeScreen = ({ navigation }: any) => {
       Alert.alert('Hata', 'Film kaynağı çekilemedi. Linki kontrol edin.');
     }
   };
+
+  const handleJoinRoom = async () => {
+    if (!joinCode) {
+      Alert.alert('hata', 'oda kodunu yanlış gitdin');
+      return;
+    }
+    setLoading(true);
+    SocketService.connect();
+    SocketService.socket?.emit(
+      'join_room',
+      { roomId: joinCode.toUpperCase() },
+      (res: { success: boolean; room: any; messages?: string }) => {
+        setLoading(false);
+        if (res.success && res.room) {
+          setRoomData({
+            roomId: joinCode.toUpperCase(),
+            streamUrl: res.room.streamUrl,
+            headers: res.room.headers,
+            isHost: false,
+          });
+          navigation.navigate('Room');
+        } else {
+          Alert.alert('hata', 'oda giriş yapılamadı');
+        }
+      },
+    );
+  };
+
+  return <View></View>;
 };
