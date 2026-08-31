@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useRoomStore } from '../store/UseRoomStore';
+import { API_URL } from '@env';
 import {
   ActivityIndicator,
   Alert,
@@ -13,7 +14,6 @@ import axios from 'axios';
 import SocketService from '../services/socket';
 import socket from '../services/socket';
 
-const API_URL = process.env.API_URL;
 export const HomeScreen = ({ navigation }: any) => {
   const [targetUrl, setTargetUrl] = useState('');
   const [joinCode, setJoinCode] = useState('');

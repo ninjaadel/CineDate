@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "react-native-dotenv": "^4.1.1"
+  }
+}
