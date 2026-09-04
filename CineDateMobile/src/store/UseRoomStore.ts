@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+//ZUSTAND AYARLARI
+
 interface RoomState {
   roomId: string | null;
   streamUrl: string | null;
