@@ -29,7 +29,7 @@ export const HomeScreen = ({ navigation }: any) => {
 
     setLoading(true);
     try {
-      const response = await axios.post(`${API_URL}/scrape`, {
+      const response = await axios.post(`http://10.0.2.2:4000/scrape`, {
         url: targetUrl,
       });
       const { headers, streamUrl } = response.data;
@@ -39,7 +39,7 @@ export const HomeScreen = ({ navigation }: any) => {
         'create_room',
         { streamUrl, headers },
         (res: { success: boolean; roomId: string }) => {
-          setLoading(true);
+          setLoading(false);
           if (res.success) {
             setRoomData({
               roomId: res.roomId,
@@ -54,7 +54,12 @@ export const HomeScreen = ({ navigation }: any) => {
         },
       );
     } catch (error) {
+      const err = error as any; // TypeScript'e 'err' değişkenini serbest bırakmasını söylüyoruz
       setLoading(false);
+
+      console.log('--- SCRAPE DETAYLI HATA ---');
+      console.log(err?.response?.data || err?.message || err);
+
       Alert.alert('Hata', 'Film kaynağı çekilemedi. Linki kontrol edin.');
     }
   };
@@ -90,16 +95,17 @@ export const HomeScreen = ({ navigation }: any) => {
     <View style={Styles.container}>
       <Text style={Styles.title}>CineDate 🍿</Text>
 
+      {/* Film Seansı Başlat Bölümü */}
       <View style={Styles.card}>
-        <Text style={Styles.cardTitle}>Filim Seansı başlat</Text>
+        <Text style={Styles.cardTitle}>Film Seansı Başlat</Text>
         <TextInput
           style={Styles.inpurt}
-          placeholder="6 Haneli Oda Kodu (Örn: X8A92M)"
+          placeholder="Film / Video Linki Yapıştırın"
           placeholderTextColor="#888"
-          maxLength={6}
-          value={joinCode}
-          onChangeText={setJoinCode}
-        ></TextInput>
+          value={targetUrl}
+          onChangeText={setTargetUrl}
+          autoCapitalize="none"
+        />
         <TouchableOpacity
           style={Styles.button}
           onPress={handleCreateRoom}
